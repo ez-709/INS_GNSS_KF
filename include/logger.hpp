@@ -5,7 +5,7 @@
 
 using namespace Eigen;
 
-class logger {
+class Logger {
     public:
         void write(IMU_data data);
         void write(GNSS_data data);
