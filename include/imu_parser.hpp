@@ -1,7 +1,5 @@
 #pragma once
-#include <Eigen/Dense>
-
-using namespace Eigen;
+#include <time.h>
 
 struct IMU_data {
     double wx, wy, wz;
@@ -12,10 +10,10 @@ struct IMU_data {
 
 class IMU_parser {
     public:
-        IMU_data read();
-    
+        IMU_data read(const struct timespec& t_start, const struct timespec& t_zero);
+
     private:
-        int gyro = 0x68;
+        int gyro  = 0x68;
         int accel = 0x53;
-        int mag = 0x1E;
+        int mag   = 0x1E;
 };
