@@ -23,29 +23,32 @@ IMU_data IMU_parser::read() {
     data.wz = raw_wz / 14.375 * 0.01745;
 
     ioctl(fd, I2C_SLAVE, accel);
+    uint8_t init[2] = {0x2D, 0x08};
+    write(fd, init, 2);
     reg = 0x32;
     write(fd, &reg, 1);
     ::read(fd, buf, 6);
-    int16_t raw_ax = (buf[0] << 8) | buf[1];
-    int16_t raw_ay = (buf[2] << 8) | buf[3];
-    int16_t raw_az = (buf[4] << 8) | buf[5];
+    int16_t raw_ax = (buf[1] << 8) | buf[0];
+    int16_t raw_ay = (buf[3] << 8) | buf[2];
+    int16_t raw_az = (buf[5] << 8) | buf[4];
     data.ax = raw_ax / 256.0 * 9.81;
     data.ay = raw_ay / 256.0 * 9.81;
     data.az = raw_az / 256.0 * 9.81;
 
     ioctl(fd, I2C_SLAVE, mag);
+    uint8_t mag_init[2] = {0x02, 0x00};
+    write(fd, mag_init, 2);
     reg = 0x03;
     write(fd, &reg, 1);
     ::read(fd, buf, 6);
     int16_t raw_mx = (buf[0] << 8) | buf[1];
-    int16_t raw_my = (buf[2] << 8) | buf[3];
-    int16_t raw_mz = (buf[4] << 8) | buf[5];
+    int16_t raw_mz = (buf[2] << 8) | buf[3];
+    int16_t raw_my = (buf[4] << 8) | buf[5];
     data.mx = raw_mx / 1090.0;
     data.my = raw_my / 1090.0;
     data.mz = raw_mz / 1090.0;
 
     data.timestamp = static_cast<double>(clock()) / CLOCKS_PER_SEC;
-
     close(fd);
     return data;
 }
