@@ -1,6 +1,11 @@
 #include "logger.hpp"
 #include <fstream>
-#include <iostream>
+
+Logger::Logger() {
+    std::ofstream("data/imu.csv",        std::ios::trunc);
+    std::ofstream("data/gnss.csv",       std::ios::trunc);
+    std::ofstream("data/estimation.csv", std::ios::trunc);
+}
 
 void Logger::write(IMU_data data) {
     std::ofstream f("data/imu.csv", std::ios::app);
@@ -9,8 +14,7 @@ void Logger::write(IMU_data data) {
     }
     f << data.timestamp << "," << data.wx << "," << data.wy << "," << data.wz << ","
       << data.ax << "," << data.ay << "," << data.az << ","
-      << data.mx << "," << data.my << "," << data.mz << std::endl;
-    f.close();
+      << data.mx << "," << data.my << "," << data.mz << "\n";
 }
 
 void Logger::write(GNSS_data data) {
@@ -19,8 +23,7 @@ void Logger::write(GNSS_data data) {
         f << "timestamp,lon,lat,alt,VE,VN,Vh\n";
     }
     f << data.timestamp << "," << data.lon << "," << data.lot << "," << data.alt << ","
-      << data.VE << "," << data.VN << "," << data.Vh << std::endl;
-    f.close();
+      << data.VE << "," << data.VN << "," << data.Vh << "\n";
 }
 
 void Logger::write(VectorXd data) {
@@ -32,6 +35,5 @@ void Logger::write(VectorXd data) {
         f << data(i);
         if (i != data.size() - 1) f << ",";
     }
-    f << std::endl;
-    f.close();
+    f << "\n";
 }
