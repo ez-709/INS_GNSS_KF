@@ -11,12 +11,15 @@ int main() {
     GNSS_parser gnss;
     Logger logger;
 
+    struct timespec t_zero;
+    clock_gettime(CLOCK_MONOTONIC, &t_zero);
+
     while (true) {
         struct timespec t_start;
         clock_gettime(CLOCK_MONOTONIC, &t_start);
 
-        IMU_data imu_data = imu.read();
-        GNSS_data gnss_data = gnss.read();
+        IMU_data imu_data   = imu.read(t_start, t_zero);
+        GNSS_data gnss_data = gnss.read(t_start, t_zero);
         logger.write(imu_data);
         logger.write(gnss_data);
 

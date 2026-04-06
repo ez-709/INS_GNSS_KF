@@ -2,10 +2,10 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <ctime>
+#include <time.h>
 #include "imu_parser.hpp"
 
-IMU_data IMU_parser::read() {
+IMU_data IMU_parser::read(const struct timespec& t_start, const struct timespec& t_zero) {
     int fd = open("/dev/i2c-1", O_RDWR);
     IMU_data data;
     uint8_t reg;
@@ -48,7 +48,9 @@ IMU_data IMU_parser::read() {
     data.my = raw_my / 1090.0;
     data.mz = raw_mz / 1090.0;
 
-    data.timestamp = static_cast<double>(clock()) / CLOCKS_PER_SEC;
+    data.timestamp = (t_start.tv_sec  - t_zero.tv_sec)
+                   + (t_start.tv_nsec - t_zero.tv_nsec) / 1e9;
+
     close(fd);
     return data;
 }
