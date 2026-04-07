@@ -39,3 +39,6 @@ def integrate_orientation(imu):
 
 def accel_norm(imu):
     return np.sqrt(imu['ax']**2 + imu['ay']**2 + imu['az']**2)
+
+def mag_norm(imu):
+    return np.sqrt(imu['mx']**2 + imu['my']**2 + imu['mz']**2)

@@ -10,11 +10,12 @@ struct IMU_data {
 };
 
 class IMU_parser {
-    public:
-        IMU_data read(const struct timespec& t_start, const struct timespec& t_zero);
+public:
+    IMU_parser();
+    IMU_data read(const struct timespec& t_start, const struct timespec& t_zero);
 
-    private:
-        int gyro  = 0x68;
-        int accel = 0x53;
-        int mag   = 0x1E;
+private:
+    int gyro  = 0x68;
+    int accel = 0x53;
+    int mag   = 0x1E;
 };

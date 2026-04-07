@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from utils import load_imu
+from utils import *
 from calculations import integrate_orientation
 from plots import plot_timeseries, plot_3d_orientation
 
@@ -11,3 +11,4 @@ plot_timeseries(imu)
 slider = plot_3d_orientation(imu, roll, pitch, yaw)
 
 plt.show()
+

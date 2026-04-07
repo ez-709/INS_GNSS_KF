@@ -6,6 +6,20 @@
 #include <time.h>
 #include "imu_parser.hpp"
 
+IMU_parser::IMU_parser() {
+    int fd = open("/dev/i2c-1", O_RDWR);
+
+    ioctl(fd, I2C_SLAVE, accel);
+    uint8_t accel_init[2] = {0x2D, 0x08};
+    write(fd, accel_init, 2);
+
+    ioctl(fd, I2C_SLAVE, mag);
+    uint8_t mag_init[2] = {0x02, 0x00};
+    write(fd, mag_init, 2);
+
+    close(fd);
+}
+
 IMU_data IMU_parser::read(const struct timespec& t_start, const struct timespec& t_zero) {
     int fd = open("/dev/i2c-1", O_RDWR);
     IMU_data data;
@@ -24,8 +38,6 @@ IMU_data IMU_parser::read(const struct timespec& t_start, const struct timespec&
     data.wz = raw_wz / 14.375 * 0.01745;
 
     ioctl(fd, I2C_SLAVE, accel);
-    uint8_t init[2] = {0x2D, 0x08};
-    write(fd, init, 2);
     reg = 0x32;
     write(fd, &reg, 1);
     ::read(fd, buf, 6);
@@ -37,8 +49,6 @@ IMU_data IMU_parser::read(const struct timespec& t_start, const struct timespec&
     data.az = raw_az / 256.0 * 9.81;
 
     ioctl(fd, I2C_SLAVE, mag);
-    uint8_t mag_init[2] = {0x02, 0x00};
-    write(fd, mag_init, 2);
     reg = 0x03;
     write(fd, &reg, 1);
     ::read(fd, buf, 6);

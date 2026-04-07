@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.widgets import Slider
 
-from calculations import matrix_of_direction_cos
+from calculations import matrix_of_direction_cos, mag_norm
 
 def plot_timeseries(imu):
     t = imu['timestamp']
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10), sharex=True)
     fig.suptitle("IMU", fontsize=13)
 
     ax1.plot(t, imu['wx'], label='wx')
@@ -33,8 +33,13 @@ def plot_timeseries(imu):
     ax3.set_xlabel('Time, s')
     ax3.legend(); ax3.grid(True)
 
-    fig.tight_layout()
+    ax4.plot(t, mag_norm(imu))
+    ax4.set_ylabel('Gs')
+    ax4.set_title('Mag norm')
+    ax4.set_xlabel('Time, s')
+    ax4.legend(); ax4.grid(True)
 
+    fig.tight_layout()
 
 def plot_3d_orientation(imu, roll, pitch, yaw):
     t = imu['timestamp']
