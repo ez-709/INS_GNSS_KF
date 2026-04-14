@@ -12,7 +12,7 @@ struct IMU_data {
 class IMU_parser {
 public:
     IMU_parser();
-    IMU_data read(const struct timespec& t_start, const struct timespec& t_zero);
+    IMU_data read();
 
 private:
     int gyro  = 0x68;

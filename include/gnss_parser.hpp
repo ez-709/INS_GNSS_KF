@@ -9,7 +9,7 @@ struct GNSS_data {
 
 class GNSS_parser {
 public:
-    GNSS_data read(const struct timespec& t_start, const struct timespec& t_zero);
+    GNSS_data read();
 
 private:
     const char* uart_port = "/dev/ttyAMA0";

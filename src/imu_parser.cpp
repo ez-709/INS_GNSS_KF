@@ -20,7 +20,7 @@ IMU_parser::IMU_parser() {
     close(fd);
 }
 
-IMU_data IMU_parser::read(const struct timespec& t_start, const struct timespec& t_zero) {
+IMU_data IMU_parser::read() {
     int fd = open("/dev/i2c-1", O_RDWR);
     IMU_data data;
     uint8_t reg;
@@ -58,9 +58,6 @@ IMU_data IMU_parser::read(const struct timespec& t_start, const struct timespec&
     data.mx = raw_mx / 1090.0;
     data.my = raw_my / 1090.0;
     data.mz = raw_mz / 1090.0;
-
-    data.timestamp = (t_start.tv_sec  - t_zero.tv_sec)
-                   + (t_start.tv_nsec - t_zero.tv_nsec) / 1e9;
 
     close(fd);
     return data;
