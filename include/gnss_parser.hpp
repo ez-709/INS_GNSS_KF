@@ -1,5 +1,4 @@
 #pragma once
-#include <time.h>
 
 struct GNSS_data {
     double lon, lot, alt;
@@ -9,8 +8,9 @@ struct GNSS_data {
 
 class GNSS_parser {
 public:
+    GNSS_parser();
     GNSS_data read();
-
 private:
-    const char* uart_port = "/dev/ttyAMA0";
+    int fd = -1;
+    GNSS_data last = {};
 };

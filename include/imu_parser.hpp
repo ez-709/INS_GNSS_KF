@@ -17,5 +17,5 @@ public:
 private:
     int gyro  = 0x68;
     int accel = 0x53;
-    int mag = 0x2C;
+    int mag = 0x1E;
 };
