@@ -2,7 +2,7 @@
 
 Logger::Logger() {
     imu_file.open("data/imu.csv");
-    imu_file << "timestamp,wx,wy,wz,ax,ay,az,mx,my,mz\n";
+    imu_file << "timestamp,wx,wy,wz,nx,ny,nz,mx,my,mz\n";
 
     gnss_file.open("data/gnss.csv");
     gnss_file << "timestamp,lon,lat,alt,VE,VN,Vh\n";

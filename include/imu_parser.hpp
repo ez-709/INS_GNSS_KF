@@ -4,7 +4,7 @@
 
 struct IMU_data {
     double wx, wy, wz;
-    double ax, ay, az;
+    double nx, ny, nz;
     double mx, my, mz;
     double timestamp;
 };

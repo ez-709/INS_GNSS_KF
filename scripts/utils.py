@@ -9,7 +9,7 @@ GNSS_PATH = os.path.join(DATA_DIR, 'gnss.csv')
 KF_PATH   = os.path.join(DATA_DIR, 'estimation.csv')
 
 def load_csv(path):
-    data = np.genfromtxt(path, delimiter=',', names=True)
+    data = np.genfromtxt(path, delimiter=',', names=True, invalid_raise=False)
     return {name: data[name] for name in data.dtype.names}
 
 def load_imu():
