@@ -22,7 +22,7 @@ void KalmanFilter::predict(IMU_data imu) {
             -imu.wy,   imu.wx,       0;
     C = C * (MatrixXd::Identity(3, 3) + Omega * T);
 
-    Vector3d(imu.nx, imu.ny, imu.nz)
+    Vector3d n = C * Vector3d(imu.nx, imu.ny, imu.nz);
     double nE = n(0);
     double nH = n(2);
 
