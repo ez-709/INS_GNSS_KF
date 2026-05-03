@@ -44,9 +44,9 @@ IMU_data IMU_parser::read() {
     int16_t raw_ax = (buf[1] << 8) | buf[0];
     int16_t raw_ay = (buf[3] << 8) | buf[2];
     int16_t raw_az = (buf[5] << 8) | buf[4];
-    data.ax = raw_ax / 256.0 * 9.81;
-    data.ay = raw_ay / 256.0 * 9.81;
-    data.az = raw_az / 256.0 * 9.81;
+    data.nx = raw_ax / 256.0 * 9.81;
+    data.ny = raw_ay / 256.0 * 9.81;
+    data.nz = raw_az / 256.0 * 9.81;
 
     ioctl(fd, I2C_SLAVE, mag);
     reg = 0x03;

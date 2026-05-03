@@ -14,7 +14,7 @@ Logger::Logger() {
 void Logger::write(IMU_data data) {
     imu_file << data.timestamp << ","
              << data.wx << "," << data.wy << "," << data.wz << ","
-             << data.ax << "," << data.ay << "," << data.az << ","
+             << data.nx << "," << data.ny << "," << data.nz << ","
              << data.mx << "," << data.my << "," << data.mz << "\n";
 }
 
