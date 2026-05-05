@@ -7,7 +7,7 @@
 #include "gnss_parser.hpp"
 
 GNSS_parser::GNSS_parser() {
-    fd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NONBLOCK);
+    fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd < 0) return;
     struct termios tty = {};
     cfsetispeed(&tty, B115200);
