@@ -10,8 +10,8 @@ GNSS_parser::GNSS_parser() {
     fd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (fd < 0) return;
     struct termios tty = {};
-    cfsetispeed(&tty, B9600);
-    cfsetospeed(&tty, B9600);
+    cfsetispeed(&tty, B115200);
+    cfsetospeed(&tty, B115200);
     tty.c_cflag = CS8 | CREAD | CLOCAL;
     tcsetattr(fd, TCSANOW, &tty);
 }
@@ -30,7 +30,6 @@ GNSS_data GNSS_parser::read() {
     char* p = buf;
     while ((nl = strchr(p, '\n')) != nullptr) {
         *nl = '\0';
-        // парсим только $GPRMC: время,статус,lat,N/S,lon,E/W,скорость,курс,...
         if (strncmp(p, "$GPRMC", 6) == 0) {
             char tmp[128]; strncpy(tmp, p, 127);
             char* f[12] = {}; int fi = 0;
