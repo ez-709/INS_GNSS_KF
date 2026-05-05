@@ -30,7 +30,7 @@ GNSS_data GNSS_parser::read() {
     char* p = buf;
     while ((nl = strchr(p, '\n')) != nullptr) {
         *nl = '\0';
-        if (strncmp(p, "$GPRMC", 6) == 0) {
+        if (strncmp(p, "$GNRMC", 6) == 0 || strncmp(p, "$GPRMC", 6) == 0) {
             char tmp[128]; strncpy(tmp, p, 127);
             char* f[12] = {}; int fi = 0;
             for (char* t = strtok(tmp, ",*"); t && fi < 12; t = strtok(nullptr, ",*"))
