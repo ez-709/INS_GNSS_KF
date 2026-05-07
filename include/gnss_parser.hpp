@@ -1,9 +1,8 @@
 #pragma once
 
 struct GNSS_data {
-    double lon, lot, alt;
+    double lon, lat, alt;
     double VE, VN, Vh;
-    double timestamp;
 };
 
 class GNSS_parser {
