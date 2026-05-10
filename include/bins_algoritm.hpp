@@ -9,16 +9,16 @@ public:
     void update(IMU_data imu);
     void correct(Eigen::VectorXd dX);
 
-    double getLat()       const { return lat; }
-    double getLon()       const { return lon; }
-    double getAlt()       const { return alt; }
-    double getVE()        const { return VE; }
-    double getVN()        const { return VN; }
-    double getVh()        const { return Vh; }
-    double getRho1()      const { return rho1; }
-    double getRho2()      const { return rho2; }
+    double getLat() const { return lat; }
+    double getLon() const { return lon; }
+    double getAlt() const { return alt; }
+    double getVE() const { return VE; }
+    double getVN() const { return VN; }
+    double getVh() const { return Vh; }
+    double getRho1()     const { return rho1; }
+    double getRho2()     const { return rho2; }
     double getTimestamp() const { return timestamp; }
-    Eigen::Matrix3d getC()      const { return C; }
+    Eigen::Matrix3d getC() const { return C; }
     Eigen::Vector3d getNormal() const { return n_normal; }
 
 private:

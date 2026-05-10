@@ -4,14 +4,15 @@
 #include "gnss_parser.hpp"
 #include "imu_parser.hpp"
 #include "bins_algoritm.hpp"
+#include "kalman_filter.hpp"
 #include "logger.hpp"
 #include "config.hpp"
 
 int main() {
     GNSS_parser gnss;
-    IMU_parser imu;
-    Logger logger;
-    
+    IMU_parser  imu;
+    Logger      logger;
+
     double nx=0, ny=0, nz=0, mx=0, my=0, mz=0;
     for (int i = 0; i < 200; i++) {
         IMU_data d = imu.read();
@@ -29,14 +30,13 @@ int main() {
     double my_c  = mx*sin(roll)*sin(pitch) + my*cos(roll) - mz*sin(roll)*cos(pitch);
     double yaw   = atan2(-my_c, mx_c);
 
-
     GNSS_data gnss_data;
     while (!gnss_data.valid)
         gnss_data = gnss.read();
-
-    printf("GNSS fixe = True\n");
+    printf("GNSS fix = True\n");
 
     BINS_algoritm bins(roll, pitch, yaw);
+    KalmanFilter  kf;
 
     struct timespec t_zero;
     clock_gettime(CLOCK_MONOTONIC, &t_zero);
@@ -54,9 +54,17 @@ int main() {
         gnss_data.timestamp = ts;
 
         bins.update(imu_data);
+        kf.predict(bins);
+
+        if (gnss_data.valid && gnss_data.fresh) {
+            kf.update(gnss_data, bins);
+            bins.correct(kf.getX());
+            gnss_data.fresh = false;
+        }
 
         logger.write(imu_data);
         logger.write(gnss_data);
+        logger.write(bins);
 
         struct timespec t_end;
         clock_gettime(CLOCK_MONOTONIC, &t_end);
