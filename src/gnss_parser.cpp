@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
+#include <cstdio>
 #include "gnss_parser.hpp"
 
 GNSS_parser::GNSS_parser() {
