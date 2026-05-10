@@ -66,6 +66,8 @@ int main() {
         if (gnss_data.valid && gnss_data.fresh) {
             kf.update(gnss_data, bins);
             bins.correct(kf.getX());
+            Eigen::VectorXd s = kf.getP().diagonal().cwiseSqrt();
+            logger.write(kf.getX(), s, ts);
             gnss_data.fresh = false;
             printf("KF update: lat=%.6f lon=%.6f\n",
                    bins.getLat() * 180.0 / M_PI,
