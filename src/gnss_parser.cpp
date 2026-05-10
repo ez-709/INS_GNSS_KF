@@ -11,7 +11,9 @@ GNSS_parser::GNSS_parser() {
     struct termios tty = {};
     cfsetispeed(&tty, B115200);
     cfsetospeed(&tty, B115200);
-    tty.c_cflag = CS8 | CREAD | CLOCAL;
+    tty.c_cflag  = CS8 | CREAD | CLOCAL;
+    tty.c_cc[VMIN]  = 1;
+    tty.c_cc[VTIME] = 0;
     tcsetattr(fd, TCSANOW, &tty);
 }
 
@@ -54,7 +56,7 @@ GNSS_data GNSS_parser::read() {
                 double heading = atof(fields[8]) * M_PI / 180.0;
                 last.VE = speed * sin(heading);
                 last.VN = speed * cos(heading);
-                last.valid = true; 
+                last.valid = true;
                 last.fresh = true;
             }
         }
