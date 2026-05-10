@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
+#include <cstdio>
 #include "gnss_parser.hpp"
 
 GNSS_parser::GNSS_parser() {
@@ -41,41 +42,62 @@ GNSS_data GNSS_parser::read() {
             continue;
         }
 
+        char* cr = strchr(dollar, '\r');
+        if (cr) *cr = '\0';
+
         if (strncmp(dollar, "$GNRMC", 6) == 0) {
             char line[256];
             strncpy(line, dollar, 255);
-            char* fields[12] = {};
+            line[255] = '\0';
+
+            char* fields[15] = {};
             int field_count = 0;
-            for (char* t = strtok(line, ",*"); t && field_count < 12; t = strtok(nullptr, ",*"))
+            char* saveptr = nullptr;
+            char* t = strtok_r(line, ",", &saveptr);
+            while (t && field_count < 15) {
                 fields[field_count++] = t;
+                t = strtok_r(nullptr, ",", &saveptr);
+            }
+
+            printf("GNRMC fields: count=%d f2=%s\n", field_count,
+                   fields[2] ? fields[2] : "NULL");
 
             if (field_count >= 9 && fields[2] && fields[2][0] == 'A') {
                 double raw = atof(fields[3]);
                 int deg  = (int)(raw / 100);
                 last.lat = deg + (raw - deg * 100) / 60.0;
-                if (fields[4][0] == 'S') last.lat = -last.lat;
+                if (fields[4] && fields[4][0] == 'S') last.lat = -last.lat;
 
                 raw      = atof(fields[5]);
                 deg      = (int)(raw / 100);
                 last.lon = deg + (raw - deg * 100) / 60.0;
-                if (fields[6][0] == 'W') last.lon = -last.lon;
+                if (fields[6] && fields[6][0] == 'W') last.lon = -last.lon;
 
-                double speed   = atof(fields[7]) * 0.51444;
-                double heading = atof(fields[8]) * M_PI / 180.0;
+                double speed = atof(fields[7]) * 0.51444;
+                double heading = fields[8] && fields[8][0] != '\0'
+                                 ? atof(fields[8]) * M_PI / 180.0
+                                 : 0.0;
                 last.VE = speed * sin(heading);
                 last.VN = speed * cos(heading);
                 last.valid = true;
                 last.fresh = true;
+                printf("PARSED: lat=%.6f lon=%.6f\n", last.lat, last.lon);
             }
         }
 
         if (strncmp(dollar, "$GNGGA", 6) == 0) {
             char line[256];
             strncpy(line, dollar, 255);
+            line[255] = '\0';
+
             char* fields[15] = {};
             int field_count = 0;
-            for (char* t = strtok(line, ",*"); t && field_count < 15; t = strtok(nullptr, ",*"))
+            char* saveptr = nullptr;
+            char* t = strtok_r(line, ",", &saveptr);
+            while (t && field_count < 15) {
                 fields[field_count++] = t;
+                t = strtok_r(nullptr, ",", &saveptr);
+            }
 
             if (field_count >= 10 && fields[9] && fields[9][0] != '\0')
                 last.alt = atof(fields[9]);
