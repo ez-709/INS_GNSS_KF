@@ -5,6 +5,7 @@ struct IMU_data {
     double wx, wy, wz;
     double nx, ny, nz;
     double mx, my, mz;
+    double timestamp = 0.0;
 };
 
 class IMU_parser {

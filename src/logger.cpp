@@ -20,8 +20,8 @@ void Logger::write(IMU_data data) {
 
 void Logger::write(GNSS_data data) {
     gnss_file << data.timestamp << ","
-              << data.lon << "," << data.lot << "," << data.alt << ","
-              << data.VE << "," << data.VN << "," << data.Vh << "\n";
+              << data.lon << "," << data.lat << "," << data.alt << ","
+              << data.VE  << "," << data.VN  << "," << data.Vh  << "\n";
 }
 
 void Logger::write(VectorXd data) {

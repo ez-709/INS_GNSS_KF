@@ -1,8 +1,10 @@
 #pragma once
 
 struct GNSS_data {
-    double lon, lat, alt;
-    double VE, VN, Vh;
+    double lon = 0.0, lat = 0.0, alt = 0.0;
+    double VE = 0.0, VN = 0.0, Vh = 0.0;
+    double timestamp = 0.0;
+    bool valid = false;
 };
 
 class GNSS_parser {

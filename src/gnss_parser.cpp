@@ -54,6 +54,7 @@ GNSS_data GNSS_parser::read() {
                 double heading = atof(fields[8]) * M_PI / 180.0;
                 last.VE = speed * sin(heading);
                 last.VN = speed * cos(heading);
+                last.valid = true; 
             }
         }
 
