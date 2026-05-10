@@ -4,7 +4,6 @@
 #include <cstring>
 #include <cstdlib>
 #include <cmath>
-#include <cstdio>
 #include "gnss_parser.hpp"
 
 GNSS_parser::GNSS_parser() {
@@ -21,13 +20,14 @@ GNSS_parser::GNSS_parser() {
 GNSS_data GNSS_parser::read() {
     if (fd < 0) return last;
 
-    static char buf[512];
+    static char buf[4096];
     static int buf_len = 0;
 
     int bytes_read = ::read(fd, buf + buf_len, sizeof(buf) - buf_len - 1);
-    printf("bytes_read=%d buf_len=%d\n", bytes_read, buf_len); 
     if (bytes_read > 0) buf_len += bytes_read;
     buf[buf_len] = '\0';
+
+    if (buf_len >= (int)sizeof(buf) - 1) buf_len = 0;
 
     char* current = buf;
     char* line_end;
@@ -35,9 +35,15 @@ GNSS_data GNSS_parser::read() {
     while ((line_end = strchr(current, '\n')) != nullptr) {
         *line_end = '\0';
 
-        if (strncmp(current, "$GNRMC", 6) == 0) {
-            char line[128];
-            strncpy(line, current, 127);
+        char* dollar = strchr(current, '$');
+        if (dollar == nullptr) {
+            current = line_end + 1;
+            continue;
+        }
+
+        if (strncmp(dollar, "$GNRMC", 6) == 0) {
+            char line[256];
+            strncpy(line, dollar, 255);
             char* fields[12] = {};
             int field_count = 0;
             for (char* t = strtok(line, ",*"); t && field_count < 12; t = strtok(nullptr, ",*"))
@@ -63,9 +69,9 @@ GNSS_data GNSS_parser::read() {
             }
         }
 
-        if (strncmp(current, "$GNGGA", 6) == 0) {
-            char line[128];
-            strncpy(line, current, 127);
+        if (strncmp(dollar, "$GNGGA", 6) == 0) {
+            char line[256];
+            strncpy(line, dollar, 255);
             char* fields[15] = {};
             int field_count = 0;
             for (char* t = strtok(line, ",*"); t && field_count < 15; t = strtok(nullptr, ",*"))
@@ -80,6 +86,7 @@ GNSS_data GNSS_parser::read() {
 
     int remaining = buf_len - (int)(current - buf);
     if (remaining > 0) memmove(buf, current, remaining);
+    else remaining = 0;
     buf_len = remaining;
 
     return last;
