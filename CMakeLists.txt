@@ -9,6 +9,7 @@ include_directories(include)
 
 add_executable(INS_GNSS_KF
     src/main.cpp
+    src/bins_algoritm.cpp
     src/kalman_filter.cpp
     src/imu_parser.cpp
     src/gnss_parser.cpp

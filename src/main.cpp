@@ -9,8 +9,8 @@
 
 int main() {
     GNSS_parser gnss;
-    IMU_parser  imu;
-    Logger      logger;
+    IMU_parser imu;
+    Logger logger;
     
     double nx=0, ny=0, nz=0, mx=0, my=0, mz=0;
     for (int i = 0; i < 200; i++) {
@@ -29,13 +29,12 @@ int main() {
     double my_c  = mx*sin(roll)*sin(pitch) + my*cos(roll) - mz*sin(roll)*cos(pitch);
     double yaw   = atan2(-my_c, mx_c);
 
-    printf("roll=%.2f pitch=%.2f yaw=%.2f\n", roll, pitch, yaw);
 
     GNSS_data gnss_data;
     while (!gnss_data.valid)
         gnss_data = gnss.read();
 
-    printf("GNSS fix acquired\n");
+    printf("GNSS fixe = True\n");
 
     BINS_algoritm bins(roll, pitch, yaw);
 
