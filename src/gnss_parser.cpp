@@ -12,9 +12,9 @@ GNSS_parser::GNSS_parser() {
     struct termios tty = {};
     cfsetispeed(&tty, B115200);
     cfsetospeed(&tty, B115200);
-    tty.c_cflag  = CS8 | CREAD | CLOCAL;
-    tty.c_cc[VMIN]  = 1;
-    tty.c_cc[VTIME] = 0;
+    tty.c_cflag      = CS8 | CREAD | CLOCAL;
+    tty.c_cc[VMIN]   = 1;
+    tty.c_cc[VTIME]  = 0;
     tcsetattr(fd, TCSANOW, &tty);
 }
 
@@ -22,7 +22,7 @@ GNSS_data GNSS_parser::read() {
     if (fd < 0) return last;
 
     static char buf[4096];
-    static int buf_len = 0;
+    static int  buf_len = 0;
 
     int bytes_read = ::read(fd, buf + buf_len, sizeof(buf) - buf_len - 1);
     if (bytes_read > 0) buf_len += bytes_read;
@@ -51,37 +51,32 @@ GNSS_data GNSS_parser::read() {
             line[255] = '\0';
 
             char* fields[15] = {};
-            int field_count = 0;
+            int   field_count = 0;
             char* saveptr = nullptr;
-            char* t = strtok_r(line, ",", &saveptr);
-            while (t && field_count < 15) {
+            for (char* t = strtok_r(line, ",", &saveptr); t && field_count < 15; t = strtok_r(nullptr, ",", &saveptr))
                 fields[field_count++] = t;
-                t = strtok_r(nullptr, ",", &saveptr);
-            }
 
-            printf("GNRMC fields: count=%d f2=%s\n", field_count,
-                   fields[2] ? fields[2] : "NULL");
-
-            if (field_count >= 9 && fields[2] && fields[2][0] == 'A') {
+            if (field_count >= 8 && fields[2] && fields[2][0] == 'A') {
                 double raw = atof(fields[3]);
-                int deg  = (int)(raw / 100);
-                last.lat = deg + (raw - deg * 100) / 60.0;
-                if (fields[4] && fields[4][0] == 'S') last.lat = -last.lat;
+                int    deg = (int)(raw / 100);
+                double lat_deg = deg + (raw - deg * 100) / 60.0;
+                if (fields[4] && fields[4][0] == 'S') lat_deg = -lat_deg;
+                last.lat = lat_deg * M_PI / 180.0;
 
                 raw      = atof(fields[5]);
                 deg      = (int)(raw / 100);
-                last.lon = deg + (raw - deg * 100) / 60.0;
-                if (fields[6] && fields[6][0] == 'W') last.lon = -last.lon;
+                double lon_deg = deg + (raw - deg * 100) / 60.0;
+                if (fields[6] && fields[6][0] == 'W') lon_deg = -lon_deg;
+                last.lon = lon_deg * M_PI / 180.0;
 
-                double speed = atof(fields[7]) * 0.51444;
-                double heading = fields[8] && fields[8][0] != '\0'
+                double speed   = atof(fields[7]) * 0.51444;
+                double heading = (fields[8] && fields[8][0] != '\0')
                                  ? atof(fields[8]) * M_PI / 180.0
                                  : 0.0;
-                last.VE = speed * sin(heading);
-                last.VN = speed * cos(heading);
+                last.VE    = speed * sin(heading);
+                last.VN    = speed * cos(heading);
                 last.valid = true;
                 last.fresh = true;
-                printf("PARSED: lat=%.6f lon=%.6f\n", last.lat, last.lon);
             }
         }
 
@@ -91,13 +86,10 @@ GNSS_data GNSS_parser::read() {
             line[255] = '\0';
 
             char* fields[15] = {};
-            int field_count = 0;
+            int   field_count = 0;
             char* saveptr = nullptr;
-            char* t = strtok_r(line, ",", &saveptr);
-            while (t && field_count < 15) {
+            for (char* t = strtok_r(line, ",", &saveptr); t && field_count < 15; t = strtok_r(nullptr, ",", &saveptr))
                 fields[field_count++] = t;
-                t = strtok_r(nullptr, ",", &saveptr);
-            }
 
             if (field_count >= 10 && fields[9] && fields[9][0] != '\0')
                 last.alt = atof(fields[9]);
