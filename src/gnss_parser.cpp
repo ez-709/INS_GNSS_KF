@@ -24,6 +24,7 @@ GNSS_data GNSS_parser::read() {
     static int buf_len = 0;
 
     int bytes_read = ::read(fd, buf + buf_len, sizeof(buf) - buf_len - 1);
+    printf("bytes_read=%d buf_len=%d\n", bytes_read, buf_len); 
     if (bytes_read > 0) buf_len += bytes_read;
     buf[buf_len] = '\0';
 
