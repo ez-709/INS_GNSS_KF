@@ -13,6 +13,7 @@ int main() {
     IMU_parser  imu;
     Logger      logger;
 
+    printf("Aligning...\n");
     double nx=0, ny=0, nz=0, mx=0, my=0, mz=0;
     for (int i = 0; i < 200; i++) {
         IMU_data d = imu.read();
@@ -29,6 +30,9 @@ int main() {
     double mx_c  = mx*cos(pitch) + mz*sin(pitch);
     double my_c  = mx*sin(roll)*sin(pitch) + my*cos(roll) - mz*sin(roll)*cos(pitch);
     double yaw   = atan2(-my_c, mx_c);
+
+    printf("roll=%.3f pitch=%.3f yaw=%.3f\n", roll, pitch, yaw);
+    printf("Waiting for GNSS fix...\n");
 
     GNSS_data gnss_data;
     while (!gnss_data.valid)
@@ -60,6 +64,7 @@ int main() {
             kf.update(gnss_data, bins);
             bins.correct(kf.getX());
             gnss_data.fresh = false;
+            printf("KF update: lat=%.6f lon=%.6f\n", bins.getLat(), bins.getLon());
         }
 
         logger.write(imu_data);
