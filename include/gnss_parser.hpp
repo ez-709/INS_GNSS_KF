@@ -5,6 +5,7 @@ struct GNSS_data {
     double VE = 0.0, VN = 0.0, Vh = 0.0;
     double timestamp = 0.0;
     bool valid = false;
+    bool fresh = false;
 };
 
 class GNSS_parser {

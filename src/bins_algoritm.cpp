@@ -34,10 +34,15 @@ void BINS_algoritm::update(IMU_data imu) {
     step++;
     if (step % 100 == 0) reorthogonalize();
     update_radius();
+
+    timestamp = imu.timestamp;
 }
 
 void BINS_algoritm::correct(Eigen::VectorXd dX) {
-
+    lon -= dX(0) / (rho2 * cos(lat));
+    lat -= dX(1) / rho1;
+    VE  -= dX(2);
+    VN  -= dX(3);
 }
 
 void BINS_algoritm::reorthogonalize() {

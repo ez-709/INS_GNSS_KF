@@ -55,6 +55,7 @@ GNSS_data GNSS_parser::read() {
                 last.VE = speed * sin(heading);
                 last.VN = speed * cos(heading);
                 last.valid = true; 
+                last.fresh = true;
             }
         }
 
