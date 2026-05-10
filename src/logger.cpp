@@ -1,15 +1,16 @@
 #include "logger.hpp"
 #include "bins_algoritm.hpp"
+#include <cmath>
 
 Logger::Logger() {
     imu_file.open("data/imu.csv");
     imu_file << "timestamp,wx,wy,wz,nx,ny,nz,mx,my,mz\n";
 
     gnss_file.open("data/gnss.csv");
-    gnss_file << "timestamp,lat,lon,alt,VE,VN,Vh\n";
+    gnss_file << "timestamp,lat_deg,lon_deg,alt,VE,VN,Vh\n";
 
     bins_file.open("data/bins.csv");
-    bins_file << "timestamp,lat,lon,alt,VE,VN,Vh\n";
+    bins_file << "timestamp,lat_deg,lon_deg,alt,VE,VN,Vh\n";
 
     kf_file.open("data/kf.csv");
     kf_file << "timestamp,"
@@ -26,14 +27,18 @@ void Logger::write(IMU_data data) {
 
 void Logger::write(GNSS_data data) {
     gnss_file << data.timestamp << ","
-              << data.lat << "," << data.lon << "," << data.alt << ","
-              << data.VE  << "," << data.VN  << "," << data.Vh  << "\n";
+              << data.lat * 180.0 / M_PI << ","
+              << data.lon * 180.0 / M_PI << ","
+              << data.alt << ","
+              << data.VE  << "," << data.VN << "," << data.Vh << "\n";
 }
 
 void Logger::write(const BINS_algoritm& bins) {
     bins_file << bins.getTimestamp() << ","
-              << bins.getLat() << "," << bins.getLon() << "," << bins.getAlt() << ","
-              << bins.getVE()  << "," << bins.getVN()  << "," << bins.getVh()  << "\n";
+              << bins.getLat() * 180.0 / M_PI << ","
+              << bins.getLon() * 180.0 / M_PI << ","
+              << bins.getAlt() << ","
+              << bins.getVE()  << "," << bins.getVN() << "," << bins.getVh() << "\n";
 }
 
 void Logger::write(VectorXd x, VectorXd s, double timestamp) {

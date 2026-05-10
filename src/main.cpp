@@ -37,7 +37,10 @@ int main() {
     GNSS_data gnss_data;
     while (!gnss_data.valid)
         gnss_data = gnss.read();
-    printf("GNSS fix = True\n");
+
+    printf("GNSS fix: lat=%.6f lon=%.6f\n",
+           gnss_data.lat * 180.0 / M_PI,
+           gnss_data.lon * 180.0 / M_PI);
 
     BINS_algoritm bins(roll, pitch, yaw);
     KalmanFilter  kf;
@@ -64,7 +67,9 @@ int main() {
             kf.update(gnss_data, bins);
             bins.correct(kf.getX());
             gnss_data.fresh = false;
-            printf("KF update: lat=%.6f lon=%.6f\n", bins.getLat(), bins.getLon());
+            printf("KF update: lat=%.6f lon=%.6f\n",
+                   bins.getLat() * 180.0 / M_PI,
+                   bins.getLon() * 180.0 / M_PI);
         }
 
         logger.write(imu_data);
