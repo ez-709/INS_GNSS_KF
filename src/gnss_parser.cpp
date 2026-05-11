@@ -10,11 +10,15 @@
 GNSS_parser::GNSS_parser() {
     fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);
     struct termios tty = {};
+    tcgetattr(fd, &tty);     
     cfsetispeed(&tty, B115200);
     cfsetospeed(&tty, B115200);
-    tty.c_cflag      = CS8 | CREAD | CLOCAL;
-    tty.c_cc[VMIN]   = 1;
-    tty.c_cc[VTIME]  = 0;
+    tty.c_cflag     = CS8 | CREAD | CLOCAL;
+    tty.c_iflag     = 0;
+    tty.c_oflag     = 0;
+    tty.c_lflag     = 0;
+    tty.c_cc[VMIN]  = 1;
+    tty.c_cc[VTIME] = 0;
     tcsetattr(fd, TCSANOW, &tty);
 }
 

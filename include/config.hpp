@@ -2,7 +2,7 @@
 #include <cmath>
 
 const double T = 0.01;
-const double SIGMA_IMU  = 0.01;
+const double SIGMA_IMU  = 1.0;
 const double SIGMA_GNSS = 5.0;
 const double G = 9.81;
 const double R = 6371000.0;

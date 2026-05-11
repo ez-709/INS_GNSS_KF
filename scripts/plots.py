@@ -18,9 +18,9 @@ def plot_timeseries(imu):
     ax1.set_title('Gyroscope')
     ax1.legend(); ax1.grid(True)
 
-    ax2.plot(t, imu['ax'], label='ax')
-    ax2.plot(t, imu['ay'], label='ay')
-    ax2.plot(t, imu['az'], label='az')
+    ax2.plot(t, imu['nx'], label='ax')
+    ax2.plot(t, imu['ny'], label='ay')
+    ax2.plot(t, imu['nz'], label='az')
     ax2.set_ylabel('m/s²')
     ax2.set_title('Accelerometer')
     ax2.legend(); ax2.grid(True)
