@@ -9,41 +9,11 @@
 #include "config.hpp"
 
 int main() {
-    GNSS_parser gnss;
-    IMU_parser  imu;
-    Logger      logger;
+    IMU_parser imu;
+    Logger     logger;
 
-    printf("Aligning...\n");
-    double nx=0, ny=0, nz=0, mx=0, my=0, mz=0;
-    for (int i = 0; i < 200; i++) {
-        IMU_data d = imu.read();
-        nx+=d.nx; ny+=d.ny; nz+=d.nz;
-        mx+=d.mx; my+=d.my; mz+=d.mz;
-        struct timespec ts = {0, 10'000'000L};
-        nanosleep(&ts, nullptr);
-    }
-    nx/=200; ny/=200; nz/=200;
-    mx/=200; my/=200; mz/=200;
-
-    double roll  = atan2(ny, nz);
-    double pitch = atan2(-nx, sqrt(ny*ny + nz*nz));
-    double mx_c  = mx*cos(pitch) + mz*sin(pitch);
-    double my_c  = mx*sin(roll)*sin(pitch) + my*cos(roll) - mz*sin(roll)*cos(pitch);
-    double yaw   = atan2(-my_c, mx_c);
-
-    printf("roll=%.3f pitch=%.3f yaw=%.3f\n", roll, pitch, yaw);
-    printf("Waiting for GNSS fix...\n");
-
-    GNSS_data gnss_data;
-    while (!gnss_data.valid)
-        gnss_data = gnss.read();
-
-    printf("GNSS fix: lat=%.6f lon=%.6f\n",
-           gnss_data.lat * 180.0 / M_PI,
-           gnss_data.lon * 180.0 / M_PI);
-
-    BINS_algoritm bins(roll, pitch, yaw);
-    KalmanFilter  kf;
+    printf("Recording IMU for calibration... Ctrl+C to stop\n");
+    printf("Place on each face for 6-10 seconds\n");
 
     struct timespec t_zero;
     clock_gettime(CLOCK_MONOTONIC, &t_zero);
@@ -52,31 +22,12 @@ int main() {
         struct timespec t_start;
         clock_gettime(CLOCK_MONOTONIC, &t_start);
 
-        IMU_data  imu_data  = imu.read();
-        GNSS_data gnss_data = gnss.read();
-
+        IMU_data imu_data = imu.read();
         double ts = (t_start.tv_sec  - t_zero.tv_sec)
                   + (t_start.tv_nsec - t_zero.tv_nsec) / 1e9;
-        imu_data.timestamp  = ts;
-        gnss_data.timestamp = ts;
-
-        bins.update(imu_data);
-        kf.predict(bins);
-
-        if (gnss_data.valid && gnss_data.fresh) {
-            kf.update(gnss_data, bins);
-            bins.correct(kf.getX());
-            Eigen::VectorXd s = kf.getP().diagonal().cwiseSqrt();
-            logger.write(kf.getX(), s, ts);
-            gnss_data.fresh = false;
-            printf("KF update: lat=%.6f lon=%.6f\n",
-                   bins.getLat() * 180.0 / M_PI,
-                   bins.getLon() * 180.0 / M_PI);
-        }
+        imu_data.timestamp = ts;
 
         logger.write(imu_data);
-        logger.write(gnss_data);
-        logger.write(bins);
 
         struct timespec t_end;
         clock_gettime(CLOCK_MONOTONIC, &t_end);
