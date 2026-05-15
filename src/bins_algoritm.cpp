@@ -3,12 +3,34 @@
 #include "imu_parser.hpp"
 #include "config.hpp"
 
-BINS_algoritm::BINS_algoritm(double roll0, double pitch0, double yaw0) {
-    C << cos(pitch0)*cos(yaw0),  sin(roll0)*sin(pitch0)*cos(yaw0) - cos(roll0)*sin(yaw0),  cos(roll0)*sin(pitch0)*cos(yaw0) + sin(roll0)*sin(yaw0),
-         cos(pitch0)*sin(yaw0),  sin(roll0)*sin(pitch0)*sin(yaw0) + cos(roll0)*cos(yaw0),  cos(roll0)*sin(pitch0)*sin(yaw0) - sin(roll0)*cos(yaw0),
-        -sin(pitch0),            sin(roll0)*cos(pitch0),                                    cos(roll0)*cos(pitch0);
+void BINS_algoritm::init_dcm(double roll0, double pitch0, double yaw0) {
+    C << cos(pitch0)*cos(yaw0),
+         sin(roll0)*sin(pitch0)*cos(yaw0) - cos(roll0)*sin(yaw0),
+         cos(roll0)*sin(pitch0)*cos(yaw0) + sin(roll0)*sin(yaw0),
+
+         cos(pitch0)*sin(yaw0),
+         sin(roll0)*sin(pitch0)*sin(yaw0) + cos(roll0)*cos(yaw0),
+         cos(roll0)*sin(pitch0)*sin(yaw0) - sin(roll0)*cos(yaw0),
+
+        -sin(pitch0),
+         sin(roll0)*cos(pitch0),
+         cos(roll0)*cos(pitch0);
 
     n_normal = Eigen::Vector3d::Zero();
+}
+
+BINS_algoritm::BINS_algoritm(double roll0, double pitch0, double yaw0) {
+    init_dcm(roll0, pitch0, yaw0);
+    update_radius();
+}
+
+BINS_algoritm::BINS_algoritm(double roll0, double pitch0, double yaw0,
+                              double lat0, double lon0, double alt0) {
+    init_dcm(roll0, pitch0, yaw0);
+    lat = lat0;
+    lon = lon0;
+    alt = alt0;
+    update_radius();
 }
 
 void BINS_algoritm::update(IMU_data imu) {
@@ -46,7 +68,8 @@ void BINS_algoritm::correct(Eigen::VectorXd dX) {
 }
 
 void BINS_algoritm::reorthogonalize() {
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd(C, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(C,
+        Eigen::ComputeFullU | Eigen::ComputeFullV);
     C = svd.matrixU() * svd.matrixV().transpose();
 }
 

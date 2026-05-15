@@ -11,21 +11,19 @@ public:
     void predict(const BINS_algoritm& bins);
     void update(const GNSS_data& gnss, const BINS_algoritm& bins);
 
-    Eigen::Matrix<double, 13, 1> getX() const { return X_hat; }
-    Eigen::Matrix<double, 13, 13> getP() const { return P; }
+    Eigen::Matrix<double,13,1>  getX() const { return X_hat; }
+    Eigen::Matrix<double,13,13> getP() const { return P; }
     double getJ() const { return P.trace(); }
+    void resetX() { X_hat.setZero(); }
 
 private:
-    Eigen::Matrix<double, 13, 1> X_hat;
-    Eigen::Matrix<double, 13, 13> P;
-
-    Eigen::Matrix<double, 13,13> F;
-    Eigen::Matrix<double, 13, 6> G;
-    Eigen::Matrix<double, 4, 13> H;
-
-    Eigen::Matrix<double, 13, 13> Phi;
-    Eigen::Matrix<double, 13, 6> Gamma;
-
-    Eigen::Matrix<double, 6, 6> Q;
-    Eigen::Matrix<double, 4, 4> R;
+    Eigen::Matrix<double,13,1>  X_hat;
+    Eigen::Matrix<double,13,13> P;
+    Eigen::Matrix<double,13,13> F;
+    Eigen::Matrix<double,13,6>  G;
+    Eigen::Matrix<double,4,13>  H;
+    Eigen::Matrix<double,13,13> Phi;
+    Eigen::Matrix<double,13,6>  Gamma;
+    Eigen::Matrix<double,6,6>   Q;
+    Eigen::Matrix<double,4,4>   R;
 };

@@ -30,10 +30,9 @@ int main() {
     double mx_c  = mx*cos(pitch) + mz*sin(pitch);
     double my_c  = mx*sin(roll)*sin(pitch) + my*cos(roll) - mz*sin(roll)*cos(pitch);
     double yaw   = atan2(-my_c, mx_c);
-
     printf("roll=%.3f pitch=%.3f yaw=%.3f\n", roll, pitch, yaw);
-    printf("Waiting for GNSS fix...\n");
 
+    printf("Waiting for GNSS fix...\n");
     GNSS_data gnss_data;
     while (!gnss_data.valid)
         gnss_data = gnss.read();
@@ -42,7 +41,9 @@ int main() {
            gnss_data.lat * 180.0 / M_PI,
            gnss_data.lon * 180.0 / M_PI);
 
-    BINS_algoritm bins(roll, pitch, yaw);
+    // начальная позиция из ГНСС
+    BINS_algoritm bins(roll, pitch, yaw,
+                       gnss_data.lat, gnss_data.lon, gnss_data.alt);
     KalmanFilter  kf;
 
     struct timespec t_zero;
@@ -66,6 +67,7 @@ int main() {
         if (gnss_data.valid && gnss_data.fresh) {
             kf.update(gnss_data, bins);
             bins.correct(kf.getX());
+            kf.resetX(); 
             Eigen::VectorXd s = kf.getP().diagonal().cwiseSqrt();
             logger.write(kf.getX(), s, ts);
             gnss_data.fresh = false;

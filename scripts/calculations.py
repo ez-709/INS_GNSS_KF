@@ -1,4 +1,26 @@
 import numpy as np
+from scipy.optimize import minimize
+
+G = 9.80665
+
+def calibrate(data):
+    def loss(params):
+        Mx, My, Mz, dx, dy, dz, Cxy, Cxz, Cyx, Cyz, Czx, Czy = params
+        M = np.array([[Mx,  Cxy, Cxz],
+                      [Cyx, My,  Cyz],
+                      [Czx, Czy, Mz]])
+        d = np.array([dx, dy, dz])
+        cal = (M @ (data - d).T).T
+        return np.sum((np.sum(cal**2, axis=1) - G**2)**2)
+    x0 = np.array([1., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
+    res = minimize(loss, x0)
+    Mx, My, Mz, dx, dy, dz, Cxy, Cxz, Cyx, Cyz, Czx, Czy = res.x
+    M = np.array([[Mx,  Cxy, Cxz],
+                  [Cyx, My,  Cyz],
+                  [Czx, Czy, Mz]])
+    d = np.array([dx, dy, dz])
+    return M, d
+
 
 def matrix_of_direction_cos(psi=0, gamma=0, theta=0):
     Rx = np.array([
