@@ -1,14 +1,17 @@
-import matplotlib.pyplot as plt
+import os
+import webbrowser
+import pandas as pd
+from plots import plot_imu, plot_kf, plot_map
 
-from utils import *
-from calculations import integrate_orientation
-from plots import plot_timeseries, plot_3d_orientation
+DATA_DIR  = os.path.join(os.path.dirname(__file__), '..', 'data')
 
-imu = load_imu()
-roll, pitch, yaw = integrate_orientation(imu)
+imu  = pd.read_csv(os.path.join(DATA_DIR, 'imu.csv'),  on_bad_lines='skip')
+gnss = pd.read_csv(os.path.join(DATA_DIR, 'gnss.csv'), on_bad_lines='skip')
+bins = pd.read_csv(os.path.join(DATA_DIR, 'bins.csv'), on_bad_lines='skip')
+kf   = pd.read_csv(os.path.join(DATA_DIR, 'kf.csv'),   on_bad_lines='skip')
 
-plot_timeseries(imu)
-slider = plot_3d_orientation(imu, roll, pitch, yaw)
+plot_imu(imu)
+plot_kf(kf)
 
-plt.show()
-
+path = plot_map(bins, gnss)
+webbrowser.open("file://" + path)

@@ -1,78 +1,85 @@
-import numpy as np
+import os
+import webbrowser
+import folium
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.widgets import Slider
 
-from calculations import matrix_of_direction_cos, mag_norm
 
-def plot_timeseries(imu):
-    t = imu['timestamp']
+def plot_imu(imu):
+    fig, axes = plt.subplots(3, 1, figsize=(12, 8), sharex=True)
+    fig.suptitle('IMU')
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10), sharex=True)
-    fig.suptitle("IMU", fontsize=13)
+    axes[0].plot(imu['timestamp'], imu['wx'], label='wx')
+    axes[0].plot(imu['timestamp'], imu['wy'], label='wy')
+    axes[0].plot(imu['timestamp'], imu['wz'], label='wz')
+    axes[0].set_ylabel('Гироскоп, рад/с')
+    axes[0].legend()
 
-    ax1.plot(t, imu['wx'], label='wx')
-    ax1.plot(t, imu['wy'], label='wy')
-    ax1.plot(t, imu['wz'], label='wz')
-    ax1.set_ylabel('rad/s')
-    ax1.set_title('Gyroscope')
-    ax1.legend(); ax1.grid(True)
+    axes[1].plot(imu['timestamp'], imu['nx'], label='nx')
+    axes[1].plot(imu['timestamp'], imu['ny'], label='ny')
+    axes[1].plot(imu['timestamp'], imu['nz'], label='nz')
+    axes[1].set_ylabel('Акселерометр, м/с²')
+    axes[1].legend()
 
-    ax2.plot(t, imu['nx'], label='ax')
-    ax2.plot(t, imu['ny'], label='ay')
-    ax2.plot(t, imu['nz'], label='az')
-    ax2.set_ylabel('m/s²')
-    ax2.set_title('Accelerometer')
-    ax2.legend(); ax2.grid(True)
+    axes[2].plot(imu['timestamp'], imu['mx'], label='mx')
+    axes[2].plot(imu['timestamp'], imu['my'], label='my')
+    axes[2].plot(imu['timestamp'], imu['mz'], label='mz')
+    axes[2].set_ylabel('Магнетометр')
+    axes[2].set_xlabel('Время, с')
+    axes[2].legend()
 
-    ax3.plot(t, imu['mx'], label='mx')
-    ax3.plot(t, imu['my'], label='my')
-    ax3.plot(t, imu['mz'], label='mz')
-    ax3.set_ylabel('Gs')
-    ax3.set_title('Magnetometer')
-    ax3.set_xlabel('Time, s')
-    ax3.legend(); ax3.grid(True)
+    plt.tight_layout()
+    plt.show()
 
-    ax4.plot(t, mag_norm(imu))
-    ax4.set_ylabel('Gs')
-    ax4.set_title('Mag norm')
-    ax4.set_xlabel('Time, s')
-    ax4.legend(); ax4.grid(True)
 
-    fig.tight_layout()
+def plot_kf(kf):
+    states = ['x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7']
+    sigs   = ['s1', 's2', 's3', 's4', 's5', 's6', 's7']
+    labels = [
+        'pos_E, м', 'pos_N, м',
+        'vel_E, м/с', 'vel_N, м/с',
+        'α, рад', 'β, рад', 'γ, рад',
+    ]
 
-def plot_3d_orientation(imu, roll, pitch, yaw):
-    t = imu['timestamp']
-    n = len(t)
+    fig, axes = plt.subplots(7, 1, figsize=(12, 18), sharex=True)
+    fig.suptitle('Состояния КФ + ±3σ')
 
-    fig = plt.figure(figsize=(10, 8))
-    ax3d = fig.add_subplot(111, projection='3d')
-    fig.subplots_adjust(bottom=0.15)
+    for ax, x, s, label in zip(axes, states, sigs, labels):
+        ax.plot(kf['timestamp'], kf[x], linewidth=0.8)
+        ax.fill_between(kf['timestamp'],
+                        kf[x] - 3 * kf[s],
+                        kf[x] + 3 * kf[s],
+                        alpha=0.3)
+        ax.set_ylabel(label, fontsize=8)
+        ax.tick_params(labelsize=7)
 
-    origin = np.zeros(3)
+    axes[-1].set_xlabel('Время, с')
+    plt.tight_layout()
+    plt.show()
 
-    def draw_frame(idx):
-        ax3d.cla()
-        R = matrix_of_direction_cos(psi=roll[idx], gamma=pitch[idx], theta=yaw[idx])
-        ax3d.quiver(*origin, *R[:, 0], color='r', length=1, normalize=True, linewidth=2.5, label='X')
-        ax3d.quiver(*origin, *R[:, 1], color='g', length=1, normalize=True, linewidth=2.5, label='Y')
-        ax3d.quiver(*origin, *R[:, 2], color='b', length=1, normalize=True, linewidth=2.5, label='Z')
-        ax3d.set_xlim(-1.2, 1.2)
-        ax3d.set_ylim(-1.2, 1.2)
-        ax3d.set_zlim(-1.2, 1.2)
-        ax3d.set_xlabel('X'); ax3d.set_ylabel('Y'); ax3d.set_zlabel('Z')
-        ax3d.set_title(
-            f't = {t[idx]:.3f} s    '
-            f'roll={np.degrees(roll[idx]):.1f}°  '
-            f'pitch={np.degrees(pitch[idx]):.1f}°  '
-            f'yaw={np.degrees(yaw[idx]):.1f}°'
-        )
-        ax3d.legend(loc='upper left')
-        fig.canvas.draw_idle()
 
-    slider_ax = fig.add_axes([0.15, 0.04, 0.70, 0.03])
-    slider = Slider(slider_ax, 'Time', 0, n - 1, valinit=0, valstep=1)
-    slider.on_changed(lambda val: draw_frame(int(val)))
+def plot_map(bins, gnss):
+    bins = bins.dropna()
+    gnss = gnss.dropna()
 
-    draw_frame(0)
-    return slider
+    bins_track = list(zip(bins['lat_deg'], bins['lon_deg']))
+    gnss_track = list(zip(gnss['lat_deg'], gnss['lon_deg']))
+
+    # центрируем по ГНСС — он показывает реальную позицию
+    lat0 = gnss['lat_deg'].mean()
+    lon0 = gnss['lon_deg'].mean()
+
+    m = folium.Map(location=[lat0, lon0], zoom_start=10, tiles="CartoDB positron")
+
+    folium.PolyLine(bins_track[::10], color="blue", weight=2,
+                    opacity=0.8, tooltip="БИНС").add_to(m)
+    folium.PolyLine(gnss_track[::10], color="red",  weight=2,
+                    opacity=0.8, tooltip="ГНСС").add_to(m)
+
+    folium.Marker(bins_track[0],  popup="БИНС Старт", icon=folium.Icon(color="blue")).add_to(m)
+    folium.Marker(bins_track[-1], popup="БИНС Финиш", icon=folium.Icon(color="blue", icon="stop")).add_to(m)
+    folium.Marker(gnss_track[0],  popup="ГНСС Старт", icon=folium.Icon(color="red")).add_to(m)
+    folium.Marker(gnss_track[-1], popup="ГНСС Финиш", icon=folium.Icon(color="red",  icon="stop")).add_to(m)
+
+    path = os.path.abspath("map.html")
+    m.save(path)
+    return path
